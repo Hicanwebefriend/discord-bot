@@ -1,0 +1,20 @@
+# Bỏ qua file chứa Token và API Key (QUAN TRỌNG NHẤT)
+.env
+TOKEN.env
+
+# Bỏ qua file rác của hệ thống Python
+__pycache__/
+*.py[cod]
+
+# Bỏ qua thư mục môi trường ảo (nếu có)
+venv/
+env/
+.venv/
+
+# Bỏ qua file cài đặt của phần mềm gõ code (VSCode, PyCharm,...)
+.vscode/
+.idea/
+
+# Bỏ qua file rác của hệ điều hành
+.DS_Store
+Thumbs.db
