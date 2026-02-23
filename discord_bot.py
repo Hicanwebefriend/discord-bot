@@ -5,6 +5,8 @@ import base64
 import requests
 import discord
 import google.generativeai as genai
+import yfinance as yf
+import asyncio
 from discord.ext import commands
 from dotenv import load_dotenv
 
@@ -12,6 +14,32 @@ from dotenv import load_dotenv
 class UtilityCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.command()
+    async def stock(self, ctx, symbol: str = "SHB"):
+        symbol = symbol.upper()
+        
+        lookup_symbol = f"{symbol}.VN" if len(symbol) == 3 and symbol.isalpha() else symbol
+        
+        async with ctx.typing():
+            try:
+                ticker = yf.Ticker(lookup_symbol)
+                
+                def fetch_data():
+                    hist = ticker.history(period="1d")
+                    if not hist.empty:
+                        return hist['Close'].iloc[-1]
+                    return None
+
+                price = await asyncio.to_thread(fetch_data)
+                
+                if price is not None:
+                    await ctx.send(f"📈 The latest closing price for **{symbol}** is: **{price:,.0f} VND**")
+                else:
+                    await ctx.send(f"❌ No data found for `{symbol}`. Please check if you typed it correctly!")
+                    
+            except Exception as e:
+                await ctx.send(f"❌ An error occurred while fetching data: {e}")
 
     @commands.command(aliases=['gemini'])
     async def gemeni(self, ctx, *, prompt: str):
@@ -90,6 +118,7 @@ class UtilityCommands(commands.Cog):
         )
         
         embed.add_field(name="💰 `!price <coin_code>`", value="Check instant cryptocurrency prices (e.g., `!price btc`, `!price eth`)", inline=False)
+        embed.add_field(name="📈 `!stock <symbol>`", value="Check stock prices (e.g., `!stock shb`, `!stock vic`)", inline=False)
         embed.add_field(name="🌐 `!ping <address>`", value="Check network connection (e.g., `!ping google.com`)", inline=False)
         embed.add_field(name="🔓 `!decode <string>`", value="Decode a Base64 string", inline=False)
         embed.add_field(name="🧠 `!gemeni <question>`", value="Summon Gemini AI to answer your questions (alias: `!gemini`)", inline=False)
@@ -123,5 +152,5 @@ if __name__ == "__main__":
     TOKEN = os.getenv("DISCORD_TOKEN")
     
     bot = MyDiscordBot()
-    
+
     bot.run(TOKEN)
