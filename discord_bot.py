@@ -19,7 +19,7 @@ class UtilityCommands(commands.Cog):
             try:
                 api_key = os.getenv("GEMINI_API_KEY")
                 if not api_key:
-                    await ctx.send("❌ Thiếu cấu hình GEMINI_API_KEY trong file .env!")
+                    await ctx.send("❌ Require GEMINI_API_KEY in file .env!")
                     return
                 genai.configure(api_key=api_key)
                 model = genai.GenerativeModel('gemini-2.5-flash')            
@@ -32,7 +32,8 @@ class UtilityCommands(commands.Cog):
                     await ctx.send(text)
 
             except Exception as e:
-                await ctx.send(f"❌ Có lỗi xảy ra khi kết nối với não bộ: {e}")
+                await ctx.send(f"❌ Something went wrong while connecting: {e}")
+
     @commands.command()
     async def price(self, ctx, coin: str = "BTC"):
         symbol = f"{coin.upper()}USDT"
@@ -44,12 +45,12 @@ class UtilityCommands(commands.Cog):
             
             if response.status_code == 200:
                 price = float(data['price'])
-                await ctx.send(f"📈 Giá **{coin.upper()}** hiện tại đang là: **${price:,.2f}**")
+                await ctx.send(f"📈 Current **{coin.upper()}** price is: **${price:,.2f}**")
             else:
-                await ctx.send(f"❌ Không tìm thấy cặp giao dịch `{symbol}`. Bạn thử lại mã khác nhé!")
+                await ctx.send(f"❌ Cannot find `{symbol}`. Try another!")
                 
         except Exception as e:
-            await ctx.send(f"❌ Có lỗi mạng hoặc API: {e}")
+            await ctx.send(f"❌ Connection error with API: {e}")
 
     @commands.command()
     async def ping(self, ctx, host: str):
@@ -75,26 +76,26 @@ class UtilityCommands(commands.Cog):
         try:
             decoded_bytes = base64.b64decode(encoded_text)
             decoded_string = decoded_bytes.decode('utf-8')
-            await ctx.send(f"**✅ Kết quả giải mã:**\n```\n{decoded_string}\n```")
+            await ctx.send(f"**✅ Decoded result:**\n```\n{decoded_string}\n```")
             
         except Exception:
-            await ctx.send("❌ Lỗi: Chuỗi Base64 không hợp lệ!")
+            await ctx.send("❌ Error: Invalid Base64 string!")
     
     @commands.command(name="help")
     async def custom_help(self, ctx):
         embed = discord.Embed(
-            title="🤖 BẢNG ĐIỀU KHIỂN SUCKBOT",
-            description="Dưới đây là danh sách các lệnh thần thánh mà bot có thể làm được:",
+            title="🤖 SUCKBOT CONTROL PANEL",
+            description="Here is the list of commands the bot can perform:",
             color=discord.Color.blue()
         )
         
-        embed.add_field(name="💰 `!price <mã_coin>`", value="Tra cứu giá tiền ảo tức thời (VD: `!price btc`, `!price eth`)", inline=False)
-        embed.add_field(name="🌐 `!ping <địa_chỉ>`", value="Kiểm tra kết nối mạng (VD: `!ping google.com`)", inline=False)
-        embed.add_field(name="🔓 `!decode <chuỗi>`", value="Giải mã chuỗi Base64 bí ẩn", inline=False)
-        embed.add_field(name="🧠 `!gemeni <câu_hỏi>`", value="Triệu hồi AI Gemini giải đáp mọi thắc mắc (alias: `!gemini`)", inline=False)
-        embed.add_field(name="🆘 `!help`", value="Hiển thị bảng hướng dẫn này", inline=False)
+        embed.add_field(name="💰 `!price <coin_code>`", value="Check instant cryptocurrency prices (e.g., `!price btc`, `!price eth`)", inline=False)
+        embed.add_field(name="🌐 `!ping <address>`", value="Check network connection (e.g., `!ping google.com`)", inline=False)
+        embed.add_field(name="🔓 `!decode <string>`", value="Decode a Base64 string", inline=False)
+        embed.add_field(name="🧠 `!gemeni <question>`", value="Summon Gemini AI to answer your questions (alias: `!gemini`)", inline=False)
+        embed.add_field(name="🆘 `!help`", value="Show this help menu", inline=False)
         
-        embed.set_footer(text=f"Người dùng yêu cầu: {ctx.author.name}", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
+        embed.set_footer(text=f"Requested by: {ctx.author.name}", icon_url=ctx.author.avatar.url if ctx.author.avatar else None)
         
         await ctx.send(embed=embed)
 
@@ -112,7 +113,7 @@ class MyDiscordBot(commands.Bot):
         channel = self.get_channel(self.channel_id)
         
         if channel is None:
-            print("⚠ Không tìm thấy channel. Kiểm tra lại CHANNEL_ID hoặc quyền của bot.")
+            print("⚠ Channel not found. Please check your CHANNEL_ID or bot permissions.")
             return
 
         await channel.send("Bot has started running")
